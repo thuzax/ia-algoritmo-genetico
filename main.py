@@ -63,17 +63,34 @@ class Individuo:
         negativo = False
         if(filho.vetor[0] == 1):
             negativo = True
-        if(filho.x > LIMITE_SUPERIOR):
+
+        if(LIMITE_SUPERIOR > 0 and filho.x > LIMITE_SUPERIOR):
             filho.x = LIMITE_SUPERIOR
             novoVetor = [0]
-            if(negativo):
-                novoVetor = [1]
             novoVetor += self.transformaEmVetorBinario(LIMITE_SUPERIOR)
             filho.vetor = novoVetor
         
-        if(negativo):
-            filho.x *= -1
+        elif(LIMITE_SUPERIOR < 0 and (filho.x * (-1)) > LIMITE_SUPERIOR):
+            filho.x = LIMITE_SUPERIOR
+            novoVetor = [1]
+            novoVetor += self.transformaEmVetorBinario(LIMITE_SUPERIOR * (-1))
+            filho.vetor = novoVetor
+        
+        elif(LIMITE_INFERIOR < 0 and (filho.x * (-1)) < LIMITE_INFERIOR):
+            filho.x = LIMITE_INFERIOR
+            novoVetor = [1]
+            novoVetor += self.transformaEmVetorBinario(LIMITE_INFERIOR * (-1))
+            filho.vetor = novoVetor
 
+        
+        elif(LIMITE_INFERIOR > 0 and filho.x < LIMITE_INFERIOR):
+            filho.x = LIMITE_INFERIOR
+            novoVetor = [0]
+            novoVetor += self.transformaEmVetorBinario(LIMITE_INFERIOR)
+            filho.vetor = novoVetor
+        
+        elif(negativo):
+            filho.x *= -1
         return filho
 
 
@@ -172,6 +189,8 @@ def main():
     populacao.sort(key = objetivo, reverse = True)
 
     for i in range(NUMERO_GERACOES):
+        print("+++++++++++++++++++++++++++++++++++++++")
+        print("GERACAO " + str(i))
         print("---------------------------------------")
         print("POPUlACAO:")
         print(populacao)
@@ -202,6 +221,9 @@ def main():
         populacao.append(segundoFilho)
         populacao.sort(key = objetivo, reverse = True)
     
+    print("+++++++++++++++++++++++++++++++++")
+    print("GERACAO FINAL: ")
+    print("---------------------------------")
     print("POPUlACAO:")
     print(populacao)
 
