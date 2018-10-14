@@ -2,11 +2,13 @@ from random import random
 import operator
 
 NUMERO_DE_BITS = 5
-NUMERO_GERACOES = 3
-TAMANHO_POPULACAO = 5
+NUMERO_GERACOES = 20
+TAMANHO_POPULACAO = 30
+TAMANHO_GRUPO_TORNEIO = 5
 LIMITE_SUPERIOR = 10
 LIMITE_INFERIOR = -10
-CHANCE = 1
+CHANCE_MUTACAO = 1
+CHANCE_CROSSOVER = 70
 
 class Individuo:
     def __init__(self):
@@ -14,7 +16,7 @@ class Individuo:
         self.vetor = []
         
     def gerarIndividuo(self):
-        self.x = int((random() * 10000) % 21 - 10)
+        self.x = (int(random()*10000) % (LIMITE_SUPERIOR-LIMITE_INFERIOR+1)) + LIMITE_INFERIOR
         absoluto = self.x
         if(self.x < 0):
             self.vetor.append(1)
@@ -47,10 +49,9 @@ class Individuo:
         return x
 
     def tentarMutacao(self):
-        sorteio = int(random() * 10000) % 100
-        if(sorteio < CHANCE):
-            posicaoMudada = int((random() * 10000) % NUMERO_DE_BITS)
-            self.vetor[posicaoMudada] = (self.vetor[posicaoMudada] + 1) % 2
+        for i in range(NUMERO_DE_BITS):
+            if(resultadoSorteio(CHANCE_MUTACAO)):
+                self.vetor[i] = (self.vetor[i] + 1) % 2
 
     def crossOver(self, outroIndividuo):
         filho = Individuo()
@@ -75,8 +76,9 @@ class Individuo:
 
         return filho
 
+
     def __str__(self):
-        saida = "x: " + str(self.x) + "\n"
+        saida = "x: " + str(self.x) + "; f(x): " + str(objetivo(self)) + "\n"
         saida  += "bin: " + str(self.vetor) + "\n"
         return saida
 
@@ -86,23 +88,77 @@ class Individuo:
 
     def __gt__(self, outroIndividuo):
         if(objetivo(self.x) > objetivo(outroIndividuo.x)):
-            return self
-        return outroIndividuo
+            return True
+        return False
 
     def __lt__(self, outroIndividuo):
         if(objetivo(self.x) < objetivo(outroIndividuo.x)):
-            return self
-        return outroIndividuo
+            return True
+        return False
 
     def __eq__(self, outroIndividuo):
+        if(outroIndividuo == None):
+            return False
         if(objetivo(self.x) == objetivo(outroIndividuo.x)):
-            return self
-        return outroIndividuo
+            return True
+        return False
+
+    def copiar(self, outroIndividuo):
+        self.x = outroIndividuo.x
+        for elemento in outroIndividuo.vetor:
+            self.vetor.append(elemento)
+
+
+def resultadoSorteio(probabilidade):
+    sorteio = int(random() * 10000) % 100
+    if(sorteio < probabilidade):
+        return True
+    return False
 
 
 def objetivo(individuo):
     x = individuo.x
     return x*x - 3*x +4
+
+def escolheUmPai(jaSorteados, populacao):
+    melhor = None
+    while(melhor == None):
+        posicaoNovaOpacao = (int(random() * 10000)) % TAMANHO_POPULACAO
+        try:
+            # se nao gera KeyError, entao ja foi sorteado, logo se refaz esse sorteio
+            jaSorteados[posicaoNovaOpacao]
+            continue
+        except:
+            # se nao tiver sido sorteado, caira na excecao e entao sera considerado o melhor ate o momento
+            jaSorteados[posicaoNovaOpacao] = populacao[posicaoNovaOpacao]
+            melhor = jaSorteados[posicaoNovaOpacao]
+
+    i = 0
+    while(i < TAMANHO_GRUPO_TORNEIO):
+        posicaoNovaOpacao = (int(random() * 10000)) % TAMANHO_POPULACAO
+        try:
+            # se nao gera KeyError, entao ja foi sorteado, logo se refaz esse sorteio
+            jaSorteados[posicaoNovaOpacao]
+            continue
+        except KeyError:
+            # se nao tiver sido sorteado, caira na excecao e entao sera verificada a opcao
+            novaOpcao = populacao[posicaoNovaOpacao]
+            jaSorteados[posicaoNovaOpacao] = novaOpcao
+            if(objetivo(melhor) < objetivo(novaOpcao)):
+                novaOpcao = melhor
+            i += 1
+
+    return (melhor, jaSorteados)
+    
+
+
+def torneio(populacao):
+    jaSorteados = {}
+    
+    primeiroPai, jaSorteados = escolheUmPai(jaSorteados, populacao)
+    segundoPai, jaSorteados = escolheUmPai(jaSorteados, populacao)
+
+    return [primeiroPai, segundoPai]
 
 
 def main():
@@ -112,22 +168,42 @@ def main():
         individuo.gerarIndividuo()
         populacao.append(individuo)
 
-    # print(str(populacao))
-
-    print("---------------------------------------")
 
     populacao.sort(key = objetivo, reverse = True)
-    # print(populacao)
-    print(populacao[0], populacao[1])
-    print(populacao[0].crossOver(populacao[1]))
-    print(populacao[1].crossOver(populacao[0]))
 
-    # for i in range(NUMERO_GERACOES):
+    for i in range(NUMERO_GERACOES):
+        print("---------------------------------------")
+        print("POPUlACAO:")
+        print(populacao)
+        pais = torneio(populacao)
+        primeiroFilho = None
+        segundoFilho = None
+        if(resultadoSorteio(CHANCE_CROSSOVER)):
+            primeiroFilho = pais[0].crossOver(pais[1])
+            segundoFilho = pais[1].crossOver(pais[0])
+        else:
+            primeiroFilho = Individuo()
+            primeiroFilho.copiar(pais[0])
 
-        
-
-    #     for j in range(TAMANHO_POPULACAO):
-            # populacao[j].tentarMutacao()
+            segundoFilho = Individuo()
+            segundoFilho.copiar(pais[1])
+        primeiroFilho.tentarMutacao()
+        segundoFilho.tentarMutacao()
+        excluido1 = populacao.pop(-1)
+        excluido2 = populacao.pop(-1)
+        print("**************************************")
+        print("REMOVIDOS:")
+        print(excluido1)
+        print(excluido2)
+        print("INSERIDOS:")
+        print(primeiroFilho)
+        print(segundoFilho)
+        populacao.append(primeiroFilho)
+        populacao.append(segundoFilho)
+        populacao.sort(key = objetivo, reverse = True)
+    
+    print("POPUlACAO:")
+    print(populacao)
 
 
 
