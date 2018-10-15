@@ -2,7 +2,7 @@
 
 link github: https://github.com/thuzax/ia-algoritmo-genetico
 
-Para executar o programa vá ao diretório raiz e insira o seguinte comando (no terminal):
+Para executar o programa vá ao diretório raiz do projeto e insira o seguinte comando (no terminal):
 
     python3 main.py
 
