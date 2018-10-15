@@ -101,26 +101,28 @@ class Individuo:
         return saida + self.__str__()
 
     def __gt__(self, outroIndividuo):
-        if(objetivo(self.x) > objetivo(outroIndividuo.x)):
+        if(objetivo(self) > objetivo(outroIndividuo)):
             return True
         return False
 
     def __lt__(self, outroIndividuo):
-        if(objetivo(self.x) < objetivo(outroIndividuo.x)):
+        if(objetivo(self) < objetivo(outroIndividuo)):
             return True
         return False
 
     def __eq__(self, outroIndividuo):
         if(outroIndividuo == None):
             return False
-        if(objetivo(self.x) == objetivo(outroIndividuo.x)):
+        if(objetivo(self) == objetivo(outroIndividuo)):
             return True
         return False
 
-    def copiar(self, outroIndividuo):
-        self.x = outroIndividuo.x
-        for elemento in outroIndividuo.vetor:
-            self.vetor.append(elemento)
+    def copiar(self):
+        novo = Individuo()
+        novo.x = self.x
+        for elemento in self.vetor:
+            novo.vetor.append(elemento)
+        return novo
 
 
 def resultadoSorteio(probabilidade):
@@ -185,6 +187,7 @@ def main():
 
     populacao.sort(key = objetivo, reverse = True)
 
+    omelhor = None
     for i in range(NUMERO_GERACOES):
         print("+++++++++++++++++++++++++++++++++++++++")
         print("GERACAO " + str(i))
@@ -198,11 +201,9 @@ def main():
             primeiroFilho = pais[0].crossOver(pais[1])
             segundoFilho = pais[1].crossOver(pais[0])
         else:
-            primeiroFilho = Individuo()
-            primeiroFilho.copiar(pais[0])
+            primeiroFilho = pais[0].copiar()
+            segundoFilho = pais[1].copiar()
 
-            segundoFilho = Individuo()
-            segundoFilho.copiar(pais[1])
         primeiroFilho.tentarMutacao()
         segundoFilho.tentarMutacao()
         excluido1 = populacao.pop(-1)
@@ -217,12 +218,17 @@ def main():
         populacao.append(primeiroFilho)
         populacao.append(segundoFilho)
         populacao.sort(key = objetivo, reverse = True)
+
+        if(not(populacao[0] == omelhor)):
+            omelhor = populacao[0].copiar()
+            indice = i
     
     print("+++++++++++++++++++++++++++++++++")
     print("GERACAO FINAL: ")
     print("---------------------------------")
     print("POPUlACAO:")
     print(populacao)
+    print("Geracao da melhor solucao encontrada: " + str(indice))
 
 
 
