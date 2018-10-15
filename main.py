@@ -60,9 +60,8 @@ class Individuo:
         filho.vetor = self.vetor[:meio] + outroIndividuo.vetor[meio:]
         filho.x = self.transformaEmDecimal(filho.vetor[1:])
 
-        negativo = False
         if(filho.vetor[0] == 1):
-            negativo = True
+            filho.x *= -1
 
         if(LIMITE_SUPERIOR > 0 and filho.x > LIMITE_SUPERIOR):
             filho.x = LIMITE_SUPERIOR
@@ -70,13 +69,13 @@ class Individuo:
             novoVetor += self.transformaEmVetorBinario(LIMITE_SUPERIOR)
             filho.vetor = novoVetor
         
-        elif(LIMITE_SUPERIOR < 0 and (filho.x * (-1)) > LIMITE_SUPERIOR):
+        elif(LIMITE_SUPERIOR < 0 and filho.x > LIMITE_SUPERIOR):
             filho.x = LIMITE_SUPERIOR
             novoVetor = [1]
             novoVetor += self.transformaEmVetorBinario(LIMITE_SUPERIOR * (-1))
             filho.vetor = novoVetor
         
-        elif(LIMITE_INFERIOR < 0 and (filho.x * (-1)) < LIMITE_INFERIOR):
+        elif(LIMITE_INFERIOR < 0 and filho.x < LIMITE_INFERIOR):
             filho.x = LIMITE_INFERIOR
             novoVetor = [1]
             novoVetor += self.transformaEmVetorBinario(LIMITE_INFERIOR * (-1))
@@ -89,8 +88,6 @@ class Individuo:
             novoVetor += self.transformaEmVetorBinario(LIMITE_INFERIOR)
             filho.vetor = novoVetor
         
-        elif(negativo):
-            filho.x *= -1
         return filho
 
 
