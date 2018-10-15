@@ -48,10 +48,38 @@ class Individuo:
                 x += 2 ** (NUMERO_DE_BITS - i - 2)
         return x
 
+    def ajeitaLimites(self):
+        if(LIMITE_SUPERIOR > 0 and self.x > LIMITE_SUPERIOR):
+            self.x = LIMITE_SUPERIOR
+            novoVetor = [0]
+            novoVetor += self.transformaEmVetorBinario(LIMITE_SUPERIOR)
+            self.vetor = novoVetor
+        
+        elif(LIMITE_SUPERIOR < 0 and self.x > LIMITE_SUPERIOR):
+            self.x = LIMITE_SUPERIOR
+            novoVetor = [1]
+            novoVetor += self.transformaEmVetorBinario(LIMITE_SUPERIOR * (-1))
+            self.vetor = novoVetor
+        
+        elif(LIMITE_INFERIOR < 0 and self.x < LIMITE_INFERIOR):
+            self.x = LIMITE_INFERIOR
+            novoVetor = [1]
+            novoVetor += self.transformaEmVetorBinario(LIMITE_INFERIOR * (-1))
+            self.vetor = novoVetor
+
+        
+        elif(LIMITE_INFERIOR > 0 and self.x < LIMITE_INFERIOR):
+            self.x = LIMITE_INFERIOR
+            novoVetor = [0]
+            novoVetor += self.transformaEmVetorBinario(LIMITE_INFERIOR)
+            self.vetor = novoVetor
+        
+
     def tentarMutacao(self):
         for i in range(NUMERO_DE_BITS):
             if(resultadoSorteio(CHANCE_MUTACAO)):
                 self.vetor[i] = (self.vetor[i] + 1) % 2
+                self.ajeitaLimites()
 
     def crossOver(self, outroIndividuo):
         filho = Individuo()
@@ -59,34 +87,11 @@ class Individuo:
         meio = int(NUMERO_DE_BITS/2) + 1
         filho.vetor = self.vetor[:meio] + outroIndividuo.vetor[meio:]
         filho.x = self.transformaEmDecimal(filho.vetor[1:])
-
-        if(filho.vetor[0] == 1):
-            filho.x *= -1
-
-        if(LIMITE_SUPERIOR > 0 and filho.x > LIMITE_SUPERIOR):
-            filho.x = LIMITE_SUPERIOR
-            novoVetor = [0]
-            novoVetor += self.transformaEmVetorBinario(LIMITE_SUPERIOR)
-            filho.vetor = novoVetor
         
-        elif(LIMITE_SUPERIOR < 0 and filho.x > LIMITE_SUPERIOR):
-            filho.x = LIMITE_SUPERIOR
-            novoVetor = [1]
-            novoVetor += self.transformaEmVetorBinario(LIMITE_SUPERIOR * (-1))
-            filho.vetor = novoVetor
-        
-        elif(LIMITE_INFERIOR < 0 and filho.x < LIMITE_INFERIOR):
-            filho.x = LIMITE_INFERIOR
-            novoVetor = [1]
-            novoVetor += self.transformaEmVetorBinario(LIMITE_INFERIOR * (-1))
-            filho.vetor = novoVetor
+        if(self.vetor[0] == 1):
+            self.x *= -1
 
-        
-        elif(LIMITE_INFERIOR > 0 and filho.x < LIMITE_INFERIOR):
-            filho.x = LIMITE_INFERIOR
-            novoVetor = [0]
-            novoVetor += self.transformaEmVetorBinario(LIMITE_INFERIOR)
-            filho.vetor = novoVetor
+        filho.ajeitaLimites()
         
         return filho
 
